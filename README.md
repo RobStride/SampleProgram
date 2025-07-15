@@ -87,9 +87,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 
 ## 四、注意事项 Important Notes
 
-- **协议切换**：如需使用 MIT 协议，请首先通过 `RobStride_Motor_MotorModeSet(0x02)` 或 `RobStride_Motor_MIT_MotorModeSet(0x02)` 进行协议切换，并断电重启电机，方可使用 MIT 接口。
+- **协议切换**：如需切换协议，请首先通过 `RobStride_Motor_MotorModeSet(0x**)` 或 `RobStride_Motor_MIT_MotorModeSet(0x**)` 进行协议切换，并断电重启电机，方可使用。
 - **MIT接口仅在 MIT 协议下有效**，普通模式下禁止误用。
-- **标准帧 CAN ID 范围为 0x00\~0x7FF**，建议不超过此范围。
+- **标准帧 CAN ID 范围为 0x00\~0x7F**，建议不超过此范围。
 - **参数地址与说明请参考 RS01 电机说明书**。
 - 本库中所有 `Enable_Motor`/`Disenable_Motor` 接口均能自动兼容当前协议，但请优先按协议规范分别调用 MIT/私有接口，避免新手混淆。
 - 控制参数如角度单位为弧度，速度单位为 rad/s，电流单位为 A。
