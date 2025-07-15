@@ -131,81 +131,85 @@ int main(void)
             RobStride_01.RobStride_Motor_Pos_control(2.0, 2);
 						HAL_Delay(5);
             break;
-        case 4: // 速度模式
+				case 4:	//CSP位置模式
+						RobStride_01.RobStride_Motor_CSP_control(2.0, 2.0);
+						HAL_Delay(5);
+						break;
+        case 5: // 速度模式
             RobStride_01.RobStride_Motor_Speed_control(3.5, 5.0);
 						HAL_Delay(5);
             break;
-        case 5: // 电流模式
+        case 6: // 电流模式
             HAL_Delay(5);
             RobStride_01.RobStride_Motor_current_control(1.2);
             break;
-        case 6: // 设置机械零点
+        case 7: // 设置机械零点
             RobStride_01.Set_ZeroPos();
             break;
-        case 7: // 读取参数
+        case 8: // 读取参数
             RobStride_01.Get_RobStride_Motor_parameter(0x7014);
             break;
-        case 8: // 设置参数
+        case 9: // 设置参数
             RobStride_01.Set_RobStride_Motor_parameter(0x7014, 0.35f, Set_parameter);
             break;
-        case 9: // 协议切换（如切MIT协议/Canopen/私有协议）
+        case 10: // 协议切换（如切MIT协议/Canopen/私有协议）
             RobStride_01.RobStride_Motor_MotorModeSet(0x02); // 0x02=MIT
             break;
 
         // ===== MIT模式接口（只能用MIT专用函数！） =====
-        case 10: // MIT 使能
+        case 11: // MIT 使能
             RobStride_01.RobStride_Motor_MIT_Enable();
             break;
-        case 11: // MIT 失能
+        case 12: // MIT 失能
             RobStride_01.RobStride_Motor_MIT_Disable();
             break;
-        case 12: // MIT 综合控制
+        case 13: // MIT 综合控制
 						RobStride_01.RobStride_Motor_MIT_SetMotorType(0x01);
             RobStride_01.RobStride_Motor_MIT_Enable();
             HAL_Delay(5);
             RobStride_01.RobStride_Motor_MIT_Control(0, 0, 0, 0, -1.0f);
             break;
-        case 13: // MIT 位置控制
+        case 14: // MIT 位置控制
 						RobStride_01.RobStride_Motor_MIT_SetMotorType(0x01);
 						RobStride_01.RobStride_Motor_MIT_Enable();
             HAL_Delay(5);
             RobStride_01.RobStride_Motor_MIT_PositionControl(1.57f, 3.0f);
             break;
-        case 14: // MIT 速度控制
+        case 15: // MIT 速度控制
 						RobStride_01.RobStride_Motor_MIT_SetMotorType(0x02);
 						RobStride_01.RobStride_Motor_MIT_Enable();
             HAL_Delay(5);
             RobStride_01.RobStride_Motor_MIT_SpeedControl(4.5f, 3.2f);
             break;
-        case 15: // MIT 零点设置（运行前需保证 MIT_Type != positionControl）
+        case 16: // MIT 零点设置（运行前需保证 MIT_Type != positionControl）
             RobStride_01.RobStride_Motor_MIT_SetZeroPos();
             break;
-        case 16: // MIT 清错
+        case 17: // MIT 清错
             RobStride_01.RobStride_Motor_MIT_ClearOrCheckError(0x01);
             break;
-        case 17: // MIT 设置电机运行模式
+        case 18: // MIT 设置电机运行模式
             RobStride_01.RobStride_Motor_MIT_SetMotorType(0x01);
             break;
-        case 18: // MIT 设置电机ID
+        case 19: // MIT 设置电机ID
             RobStride_01.RobStride_Motor_MIT_SetMotorId(0x05);
             break;
-        case 19: //主动上报
+        case 20: //主动上报
             RobStride_01.RobStride_Motor_ProactiveEscalationSet(0x00);
             break;
-        case 20: // 波特率修改
+        case 21: // 波特率修改
             RobStride_01.RobStride_Motor_BaudRateChange(0x01);
             break;
-        case 21: // MIT 参数保存
+        case 22: // MIT 参数保存
             RobStride_01.RobStride_Motor_MotorDataSave();
             break;
-				case 22: // MIT 协议切换（如切MIT协议/Canopen/私有协议）
+				case 23: // MIT 协议切换（如切MIT协议/Canopen/私有协议）
 						RobStride_01.RobStride_Motor_MIT_MotorModeSet(0x00);
 						break;
 
         default:
             break;
     }		
-		mode = 23;
+		mode = 24;
 		HAL_Delay(50);
     /* USER CODE END WHILE */
 

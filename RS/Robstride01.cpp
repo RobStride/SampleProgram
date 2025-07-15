@@ -472,8 +472,13 @@ void RobStride_Motor::RobStride_Motor_CSP_control(float Angle, float limit_spd)
 	else{
 		Motor_Set_All.set_angle = Angle;
 		Motor_Set_All.set_limit_speed = limit_spd;
-		Set_RobStride_Motor_parameter(0X7005, Pos_control_mode, Set_mode);
-		Set_RobStride_Motor_parameter(0X7018, Motor_Set_All.set_limit_speed, Set_parameter);
+		if (drw.run_mode.data != 1)
+		{
+			Set_RobStride_Motor_parameter(0X7005, CSP_control_mode, Set_mode);
+			Get_RobStride_Motor_parameter(0x7005);
+			Enable_Motor();
+			Set_RobStride_Motor_parameter(0X7017, Motor_Set_All.set_limit_speed, Set_parameter);
+		}
 		HAL_Delay(1);
 		Set_RobStride_Motor_parameter(0X7016, Motor_Set_All.set_angle, Set_parameter);
 	}
