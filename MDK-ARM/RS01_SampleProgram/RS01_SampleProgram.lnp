@@ -1,0 +1,27 @@
+--cpu Cortex-M3
+"rs01_sampleprogram\startup_stm32f103xe.o"
+"rs01_sampleprogram\main.o"
+"rs01_sampleprogram\gpio.o"
+"rs01_sampleprogram\can.o"
+"rs01_sampleprogram\stm32f1xx_it.o"
+"rs01_sampleprogram\stm32f1xx_hal_msp.o"
+"rs01_sampleprogram\stm32f1xx_hal_gpio_ex.o"
+"rs01_sampleprogram\stm32f1xx_hal_can.o"
+"rs01_sampleprogram\stm32f1xx_hal.o"
+"rs01_sampleprogram\stm32f1xx_hal_rcc.o"
+"rs01_sampleprogram\stm32f1xx_hal_rcc_ex.o"
+"rs01_sampleprogram\stm32f1xx_hal_gpio.o"
+"rs01_sampleprogram\stm32f1xx_hal_dma.o"
+"rs01_sampleprogram\stm32f1xx_hal_cortex.o"
+"rs01_sampleprogram\stm32f1xx_hal_pwr.o"
+"rs01_sampleprogram\stm32f1xx_hal_flash.o"
+"rs01_sampleprogram\stm32f1xx_hal_flash_ex.o"
+"rs01_sampleprogram\stm32f1xx_hal_exti.o"
+"rs01_sampleprogram\stm32f1xx_hal_tim.o"
+"rs01_sampleprogram\stm32f1xx_hal_tim_ex.o"
+"rs01_sampleprogram\system_stm32f1xx.o"
+"rs01_sampleprogram\robstride01.o"
+--strict --scatter "RS01_SampleProgram\RS01_SampleProgram.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "RS01_SampleProgram.map" -o RS01_SampleProgram\RS01_SampleProgram.axf

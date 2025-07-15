@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2024 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2025 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -24,8 +24,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "canDisposition.h"
-#include "Robstrite.h"
+
+#include "RobStride.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,13 +51,13 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-CAN_TxHeaderTypeDef CAN_TxHeaderStrue; // 定义CAN发送报头结构体
-CAN_RxHeaderTypeDef CAN_RxHeaderStrue; // 定义CAN接收报头结构体
-uint8_t pRxdata[8], pTxdata[8]; // 定义接收和发送数据缓存
-RobStrite_Motor RobStrite_01(0x01);
-//Can_Struct Can_Robstrite;
+CAN_FilterTypeDef CAN_FilterStrue; 
+CAN_TxHeaderTypeDef CAN_TxHeaderStrue; 
+CAN_RxHeaderTypeDef CAN_RxHeaderStrue; 
+uint8_t pRxdata[8], pTxdata[8]; 
+RobStride_Motor RobStride_01(0x7F, false);
 
-
+uint8_t mode = 0; 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -93,56 +93,122 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_CAN1_Init();
+  MX_CAN_Init();
   /* USER CODE BEGIN 2 */
-	HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING); // 启用接收FIFO0消息挂起中断
-	HAL_CAN_Start(&hcan1); // 启动CAN
-
-	RobStrite_01.RobStrite_Get_CAN_ID(); //电机获取设备ID和MCU，请按照需要使用
+  CAN_FilterStrue.FilterBank = 0; 
+  CAN_FilterStrue.FilterMode = CAN_FILTERMODE_IDMASK; 
+  CAN_FilterStrue.FilterScale = CAN_FILTERSCALE_16BIT; 
+  CAN_FilterStrue.FilterIdHigh = 0;
+	CAN_FilterStrue.FilterIdLow = 0;
+	CAN_FilterStrue.FilterActivation = ENABLE;
+	CAN_FilterStrue.FilterFIFOAssignment = CAN_RX_FIFO0;
 	
-	RobStrite_01.Set_CAN_ID(0x01);				//电机设置CANID，请按照需要使用
+	HAL_CAN_ConfigFilter(&hcan, &CAN_FilterStrue);
+  HAL_CAN_Start(&hcan); //鍚姩CAN
+  HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); 
 	
-	RobStrite_01.Set_ZeroPos();					//设置当前位置为电机机械零位，请按照需要使用
 	
-	RobStrite_01.Enable_Motor();					//电机使能
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
-		//*********运控模式*************//
-		float T = 0.1; 			//扭矩
-		float Angle = 0.5; 	//要转到的位置
-		float Speed = 0.1;	//目标速度
-		float Pacceleration = 1; //加速度
-		float Kp = 0.1;			//Kp
-		float Kd = 0.1;			//Kd
-		RobStrite_01.RobStrite_Motor_move_control(T, Angle, Speed, Kp, Kd);
-		
-		
-		//*********位置模式*************//	
-		RobStrite_01.RobStrite_Motor_Pos_control(Speed, Pacceleration, Angle);
-		
-		
-		
-		//*********速度模式*************//	
-		float Limit_cur  = 0.1; //限制电流
-		float Cacceleration = 1; //加速度
-		RobStrite_01.RobStrite_Motor_Speed_control(Speed, Cacceleration, Limit_cur);
-		
-		
-		//*********电流模式*************//	
-		float current  = 0.1;	//目标电流
-		RobStrite_01.RobStrite_Motor_current_control(current);
-		
-		
-		RobStrite_01.Disenable_Motor(0);	//电机失能，谨慎使用
-		
+    switch(mode)
+    {
+        // ===== 普通模式接口 =====
+        case 0: // 使能（普通模式）
+            RobStride_01.Enable_Motor();
+            break;
+        case 1: // 失能（普通模式）
+            RobStride_01.Disenable_Motor(1);
+            break;
+        case 2: // 运控模式
+            HAL_Delay(5);
+            RobStride_01.RobStride_Motor_move_control(5, 0, 0, 0.0, 0.0);
+            break;
+        case 3: // PP位置模式
+            RobStride_01.RobStride_Motor_Pos_control(2.0, 2);
+						HAL_Delay(5);
+            break;
+        case 4: // 速度模式
+            RobStride_01.RobStride_Motor_Speed_control(3.5, 5.0);
+						HAL_Delay(5);
+            break;
+        case 5: // 电流模式
+            HAL_Delay(5);
+            RobStride_01.RobStride_Motor_current_control(1.2);
+            break;
+        case 6: // 设置机械零点
+            RobStride_01.Set_ZeroPos();
+            break;
+        case 7: // 读取参数
+            RobStride_01.Get_RobStride_Motor_parameter(0x7014);
+            break;
+        case 8: // 设置参数
+            RobStride_01.Set_RobStride_Motor_parameter(0x7014, 0.35f, Set_parameter);
+            break;
+        case 9: // 协议切换（如切MIT协议/Canopen/私有协议）
+            RobStride_01.RobStride_Motor_MotorModeSet(0x02); // 0x02=MIT
+            break;
 
-		HAL_Delay(2);		
-		
+        // ===== MIT模式接口（只能用MIT专用函数！） =====
+        case 10: // MIT 使能
+            RobStride_01.RobStride_Motor_MIT_Enable();
+            break;
+        case 11: // MIT 失能
+            RobStride_01.RobStride_Motor_MIT_Disable();
+            break;
+        case 12: // MIT 综合控制
+						RobStride_01.RobStride_Motor_MIT_SetMotorType(0x01);
+            RobStride_01.RobStride_Motor_MIT_Enable();
+            HAL_Delay(5);
+            RobStride_01.RobStride_Motor_MIT_Control(0, 0, 0, 0, -1.0f);
+            break;
+        case 13: // MIT 位置控制
+						RobStride_01.RobStride_Motor_MIT_SetMotorType(0x01);
+						RobStride_01.RobStride_Motor_MIT_Enable();
+            HAL_Delay(5);
+            RobStride_01.RobStride_Motor_MIT_PositionControl(1.57f, 3.0f);
+            break;
+        case 14: // MIT 速度控制
+						RobStride_01.RobStride_Motor_MIT_SetMotorType(0x02);
+						RobStride_01.RobStride_Motor_MIT_Enable();
+            HAL_Delay(5);
+            RobStride_01.RobStride_Motor_MIT_SpeedControl(4.5f, 3.2f);
+            break;
+        case 15: // MIT 零点设置（运行前需保证 MIT_Type != positionControl）
+            RobStride_01.RobStride_Motor_MIT_SetZeroPos();
+            break;
+        case 16: // MIT 清错
+            RobStride_01.RobStride_Motor_MIT_ClearOrCheckError(0x01);
+            break;
+        case 17: // MIT 设置电机运行模式
+            RobStride_01.RobStride_Motor_MIT_SetMotorType(0x01);
+            break;
+        case 18: // MIT 设置电机ID
+            RobStride_01.RobStride_Motor_MIT_SetMotorId(0x05);
+            break;
+        case 19: //主动上报
+            RobStride_01.RobStride_Motor_ProactiveEscalationSet(0x00);
+            break;
+        case 20: // 波特率修改
+            RobStride_01.RobStride_Motor_BaudRateChange(0x01);
+            break;
+        case 21: // MIT 参数保存
+            RobStride_01.RobStride_Motor_MotorDataSave();
+            break;
+				case 22: // MIT 协议切换（如切MIT协议/Canopen/私有协议）
+						RobStride_01.RobStride_Motor_MIT_MotorModeSet(0x00);
+						break;
+
+        default:
+            break;
+    }		
+		mode = 23;
+		HAL_Delay(50);
+    /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -157,21 +223,16 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /** Configure the main internal regulator output voltage
-  */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 6;
-  RCC_OscInitStruct.PLL.PLLN = 168;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -182,27 +243,30 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
 }
 
 /* USER CODE BEGIN 4 */
-
 CAN_RxHeaderTypeDef RXHeader;
 uint8_t RxData[8];
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)					//涓柇鍥炶皟锛屽綋鎴戣瀹氱殑閭CAN鍙ｅ搴旂殑閭鏈夋暟鎹繘鍏ワ紝鍒欒繘鍏ヤ腑鏂?		
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)							
 {
 
-	if(HAL_CAN_GetRxMessage(&hcan1,CAN_RX_FIFO0,&RXHeader,RxData) == HAL_OK)
+	if(HAL_CAN_GetRxMessage(hcan,CAN_RX_FIFO0,&RXHeader,RxData) == HAL_OK)
 	{
 		if (RXHeader.IDE == CAN_ID_EXT)
 		{
-				RobStrite_01.RobStrite_Motor_Analysis(RxData, RXHeader.ExtId);
+				RobStride_01.RobStride_Motor_Analysis(RxData, RXHeader.ExtId);
+		}
+		else
+		{
+				RobStride_01.RobStride_Motor_Analysis(RxData, RXHeader.StdId);
 		}
 	}	
 }
