@@ -112,7 +112,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 
 ## 7. Contact
 
-For support, contact the author or Lingzu Era technical support.
+For support, contact the author or RobStride technical support.
 
 ---
 
